@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS inquerito (
     prorrogado          INTEGER DEFAULT 0,      -- 0/1 (juiz autorizou duplicar)
     data_prorrogacao    TEXT,
     status              TEXT DEFAULT 'em_andamento', -- em_andamento|relatado|arquivado|na_justica
+    conferido           INTEGER DEFAULT 0,      -- 0 = sugerido pela IA, aguarda conferencia
     criado_em           TEXT DEFAULT (datetime('now'))
 );
 
@@ -33,7 +34,8 @@ CREATE TABLE IF NOT EXISTS crime (
     inquerito_id       INTEGER NOT NULL REFERENCES inquerito(id) ON DELETE CASCADE,
     tipificacao_codigo TEXT,                    -- FK logica para o catalogo (catalogo.py)
     descricao          TEXT,
-    data_fato          TEXT
+    data_fato          TEXT,
+    conferido          INTEGER DEFAULT 0         -- 0 = sugerido pela IA
 );
 
 CREATE TABLE IF NOT EXISTS pessoa (
@@ -41,7 +43,8 @@ CREATE TABLE IF NOT EXISTS pessoa (
     inquerito_id INTEGER NOT NULL REFERENCES inquerito(id) ON DELETE CASCADE,
     nome         TEXT NOT NULL,
     papel        TEXT,                           -- investigado|preso|testemunha|vitima|condutor
-    situacao     TEXT                            -- preso|foragido|solto...
+    situacao     TEXT,                           -- preso|foragido|solto...
+    conferido    INTEGER DEFAULT 0               -- 0 = sugerido pela IA
 );
 
 CREATE TABLE IF NOT EXISTS documento (
@@ -54,6 +57,7 @@ CREATE TABLE IF NOT EXISTS documento (
     data           TEXT,
     hash           TEXT,                          -- detecta alteracao
     texto_extraido TEXT,                          -- markdown (fica no banco cifrado)
+    extracao_json  TEXT,                           -- JSON cru que a IA extraiu (p/ tela de conferencia)
     status_extracao TEXT DEFAULT 'pendente',      -- pendente|processado|conferido
     criado_em      TEXT DEFAULT (datetime('now'))
 );

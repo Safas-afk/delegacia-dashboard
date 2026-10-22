@@ -159,10 +159,12 @@ Nada vindo da IA aparece como fato até ser conferido.
 ### Feito (2026-10-22)
 - [x] Protótipo de IA validado (PDF → markdown → Qwen, 9/9 campos).
 - [x] Base de dados: schema cifrado, catálogo, motor de prazos, motor de pendências.
-- [x] 18 testes passando; demo ponta a ponta (`seed_demo.py`).
+- [x] Integração pipeline→banco (`app/ingestao.py`): extrai do PDF e grava como
+      proposta não conferida, casando pelo nº do IP; mapeamento determinístico de
+      tipificações. Validado com o Qwen real (`ingesta_demo.py`).
+- [x] 24 testes passando; demos ponta a ponta (`seed_demo.py`, `ingesta_demo.py`).
 
 ### A fazer
-- [ ] Integrar o pipeline (prototipo) como módulo que grava no banco.
 - [ ] Backend FastAPI + API das telas.
 - [ ] Dashboard (5 telas).
 - [ ] Login + auto-bloqueio + senha→chave do banco.
@@ -175,9 +177,10 @@ Nada vindo da IA aparece como fato até ser conferido.
 ```bash
 cd ~/projetos/delegacia-dashboard
 # ambiente (reusa o venv do prototipo, que ja tem as libs)
-prototipo/.venv/bin/python -m pytest -q        # roda os testes
-prototipo/.venv/bin/python seed_demo.py        # demo ponta a ponta
-# protótipo de IA (precisa do modelo em prototipo/modelos/*.gguf)
+prototipo/.venv/bin/python -m pytest -q        # roda os testes (24)
+prototipo/.venv/bin/python seed_demo.py        # demo das regras (sem IA)
+prototipo/.venv/bin/python ingesta_demo.py     # integracao real PDF->Qwen->banco (~2min)
+# protótipo de IA isolado (precisa do modelo em prototipo/modelos/*.gguf)
 cd prototipo && .venv/bin/python pipeline.py
 ```
 
