@@ -1,0 +1,16 @@
+# ambientes e caches
+.venv/
+__pycache__/
+*.pyc
+
+# modelos de IA (grandes, baixados a parte)
+*.gguf
+prototipo/modelos/
+
+# bancos e dados sensiveis (NUNCA versionar)
+*.db
+*.db-journal
+demo.db
+
+# saidas do prototipo
+prototipo/saida/
