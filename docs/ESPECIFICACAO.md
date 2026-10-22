@@ -138,10 +138,12 @@ Nada vindo da IA aparece como fato até ser conferido.
 - **Acesso:** senha forte (Argon2) no MVP; **auto-bloqueio por inatividade**. YubiKey/FIDO2 como
   2º fator fica para fase posterior.
 - **Trilha de auditoria:** quem aprovou o quê e quando.
-- **Implantação escolhida — drive portátil criptografado:** programa + modelos + banco vivem num
-  HD/pendrive externo cifrado (container BitLocker To Go — PC é Win 11 Pro — ou VeraCrypt) que o
-  delegado carrega. **Nada sigiloso fica no PC compartilhado.** Roda em qualquer Windows (delegacia
-  ou notebook). **Backup** do container (cifrado) num HD/PC pessoal.
+- **Implantação — instalado no PC da delegacia:** o programa (app + modelos + banco) fica instalado
+  na máquina de trabalho. O banco SQLCipher cifrado protege os dados em repouso (máquina
+  desligada/roubada = arquivo ilegível). **Backup** do banco cifrado (continua cifrado) num HD/PC
+  pessoal do delegado.
+  > Decisão do delegado (2026-10-22): roda só no PC do trabalho. O drive portátil criptografado foi
+  > avaliado e **descartado** do escopo.
 - **Legal:** dado de investigação penal tem regime próprio (fora da LGPD comum, art. 4º III da
   Lei 13.709), mas valem o devido processo e o segredo de justiça; cripto + acesso + auditoria +
   minimização atendem as boas práticas esperadas (art. 44).
@@ -151,8 +153,8 @@ Nada vindo da IA aparece como fato até ser conferido.
 - App é Python → **roda nativo no Linux** durante todo o desenvolvimento (testa 100% da lógica).
 - O `.exe` Windows é gerado via **GitHub Actions (runner Windows)** — PyInstaller não faz
   cross-compile. Opcional: rodar o `.exe` pronto no **Wine** para um smoke test.
-- Binários de llama.cpp/whisper.cpp e o GGUF são por sistema (Linux no dev, Windows no drive final);
-  o código Python é o mesmo.
+- Binários de llama.cpp/whisper.cpp e o GGUF são por sistema (Linux no dev, Windows na instalação
+  final do PC); o código Python é o mesmo.
 
 ## 10. Estado atual e roadmap
 
@@ -169,7 +171,7 @@ Nada vindo da IA aparece como fato até ser conferido.
 - [ ] Dashboard (5 telas).
 - [ ] Login + auto-bloqueio + senha→chave do banco.
 - [ ] Caminho OCR para PDFs escaneados (Docling).
-- [ ] Empacotamento portátil + drive cifrado + build do `.exe`.
+- [ ] Empacotamento: instalador/`.exe` para o PC da delegacia (build via GitHub Actions).
 - [ ] Coletar com o delegado: tipos reais de documento e campos mais usados.
 
 ## 11. Como rodar (desenvolvimento)
