@@ -45,3 +45,33 @@ def test_busca(cliente):
     r = cliente.get("/api/busca", params={"q": "Patagonia"})
     assert r.status_code == 200
     assert len(r.json()["casos"]) == 1
+
+
+def test_catalogo(cliente):
+    r = cliente.get("/api/catalogo")
+    assert r.status_code == 200
+    codigos = [x["codigo"] for x in r.json()]
+    assert "LD_33" in codigos
+
+
+def test_conferir_inquerito_tira_da_lista(cliente, banco):
+    inq_id = banco.execute("SELECT id FROM inquerito").fetchone()["id"]
+    r = cliente.put(f"/api/conferencia/inquerito/{inq_id}", json={})
+    assert r.status_code == 200
+    # conferido=1 -> sai da lista de conferencia
+    assert cliente.get("/api/conferencia").json()["inqueritos"] == []
+
+
+def test_rejeitar_pessoa(cliente, banco):
+    pid = banco.execute("SELECT id FROM pessoa").fetchone()["id"]
+    r = cliente.delete(f"/api/conferencia/pessoa/{pid}")
+    assert r.status_code == 200
+    assert banco.execute("SELECT count(*) AS n FROM pessoa").fetchone()["n"] == 0
+
+
+def test_conferir_inexistente_404(cliente):
+    assert cliente.put("/api/conferencia/inquerito/999", json={}).status_code == 404
+
+
+def test_conferir_tipo_invalido_400(cliente):
+    assert cliente.put("/api/conferencia/documento/1", json={}).status_code == 400

@@ -7,17 +7,20 @@ Uma conexao por requisicao (app local, 1 usuario): simples e sem problema de thr
 """
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
-from . import db, visao
+from . import catalogo, conferencia, db, visao
 
 DIST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web", "dist")
 
 
 def abrir_conexao():
     caminho = os.environ.get("DELEGACIA_DB_CAMINHO", "demo.db")
-    return db.conectar(caminho)
+    # check_same_thread=False: o FastAPI pode resolver esta dependencia numa
+    # thread do pool e rodar o endpoint em outra. A conexao e por requisicao
+    # (nunca compartilhada entre requisicoes simultaneas), entao e seguro.
+    return db.conectar(caminho, check_same_thread=False)
 
 
 def get_con():
@@ -50,13 +53,43 @@ def caso(caso_id: int, hoje: str | None = Query(None), con=Depends(get_con)):
 
 
 @app.get("/api/conferencia")
-def conferencia(con=Depends(get_con)):
+def listar_conferencia(con=Depends(get_con)):
     return visao.itens_conferencia(con)
 
 
 @app.get("/api/busca")
 def busca(q: str = Query(""), con=Depends(get_con)):
     return visao.busca(con, q)
+
+
+@app.get("/api/catalogo")
+def catalogo_tipificacoes():
+    # para o dropdown de tipificacao na conferencia de crime
+    return [{"codigo": c, "rotulo": r} for c, r in catalogo.lista()]
+
+
+# --- escrita da conferencia (aprovar/corrigir/rejeitar) ---
+@app.put("/api/conferencia/{tipo}/{item_id}")
+def conferir(tipo: str, item_id: int, campos: dict = Body(default={}),
+             con=Depends(get_con)):
+    try:
+        ok = conferencia.salvar(con, tipo, item_id, campos)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not ok:
+        raise HTTPException(status_code=404, detail="item nao encontrado")
+    return {"ok": True}
+
+
+@app.delete("/api/conferencia/{tipo}/{item_id}")
+def rejeitar(tipo: str, item_id: int, con=Depends(get_con)):
+    try:
+        ok = conferencia.rejeitar(con, tipo, item_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not ok:
+        raise HTTPException(status_code=404, detail="item nao encontrado")
+    return {"ok": True}
 
 
 # Front empacotado: serve o build do Vite em / (depois das rotas /api, que tem
