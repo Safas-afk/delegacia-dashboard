@@ -1,11 +1,10 @@
-"""Demonstra a INTEGRACAO completa: PDF real -> Qwen -> banco cifrado -> dashboard.
+"""Demonstra a INTEGRACAO completa: PDF real -> Qwen -> banco -> dashboard.
 Roda o modelo de verdade (lento, ~2min). Prova a ponte pipeline->banco.
 """
 import os
 from app import db, ingestao, prazos, pendencias, catalogo
 
 CAMINHO = "ingesta_demo.db"
-SENHA = "senha-demo"
 PDF = "prototipo/pdfs/inquerito_ficticio.pdf"
 HOJE = "2026-03-12"
 
@@ -13,7 +12,7 @@ HOJE = "2026-03-12"
 def main():
     if os.path.exists(CAMINHO):
         os.remove(CAMINHO)
-    con = db.conectar(CAMINHO, SENHA)
+    con = db.conectar(CAMINHO)
     db.inicializa(con)
 
     print(">> ingerindo PDF real (PDF->markdown->Qwen->banco)...")

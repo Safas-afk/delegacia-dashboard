@@ -14,12 +14,11 @@ HOJE = "2026-03-12"
 
 @pytest.fixture
 def banco(tmp_path):
-    """Banco cifrado com o cenario Operacao Patagonia (preso, drogas, 3 crimes,
+    """Banco com o cenario Operacao Patagonia (preso, drogas, 3 crimes,
     so a portaria: sem comunicacao ao MP e sem laudo definitivo). Mesmo cenario
     do seed_demo.py, reaproveitado pelos testes de visao e de API.
     """
-    con = db.conectar(str(tmp_path / "teste.db"), "senha-forte-123",
-                      check_same_thread=False)
+    con = db.conectar(str(tmp_path / "teste.db"), check_same_thread=False)
     db.inicializa(con)
 
     caso_id = con.execute(

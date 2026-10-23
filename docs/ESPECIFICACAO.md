@@ -24,7 +24,7 @@ associação, art. 35). O sistema modela essa evolução.
 | # | Requisito | Motivo |
 |---|-----------|--------|
 | 1 | **100% local e offline** | Dados sensíveis, segredo de justiça. Nada pode sair da máquina. |
-| 2 | **Segurança em primeiro lugar** | Criptografia, controle de acesso, trilha de auditoria. |
+| 2 | **Segurança física da máquina** | Decisão do delegado (2026-10-23): proteção é o PC em sala com câmera, que só liga com o login dele. Sem senha nem cifra no app (acesso físico de terceiros = fora do modelo de ameaça). Mantida a trilha de auditoria. |
 | 3 | **Roda em Windows** | PC da delegacia (Windows 11 Pro). |
 | 4 | **IA pequena rodando em CPU** | Sem GPU dedicada; modelo leve quantizado. |
 | 5 | **IA é assistente, não verdade** | Modelo pequeno erra; é processo criminal. O delegado confere tudo. |
@@ -38,7 +38,8 @@ GPU **integrada Intel UHD 630** (sem NVIDIA), Windows 11 Pro 64-bit. Perfil **CP
 - **Linguagem:** Python (melhor ecossistema para IA local, PDF, OCR).
 - **Interface:** aplicação **web local** servida só em `127.0.0.1` (backend FastAPI + front no
   navegador). Dashboard rico, offline, sem expor nenhuma porta de rede.
-- **Banco:** **SQLite + SQLCipher** (AES-256), arquivo único, cifrado em repouso.
+- **Banco:** **SQLite** (arquivo único local). Sem cifra/senha, por decisão do delegado
+  (2026-10-23); ver requisito 2 e seção 8.
 - **IA:** modelo **Qwen** pequeno quantizado (GGUF) via **llama.cpp** (binário portátil, offline).
 - **Empacotamento:** PyInstaller → executável; build do `.exe` via GitHub Actions (runner Windows).
 
@@ -133,20 +134,22 @@ Nada vindo da IA aparece como fato até ser conferido.
 ## 8. Segurança e implantação
 
 - **Offline real:** backend só em `127.0.0.1`, zero telemetria; regra de firewall bloqueando o `.exe`.
-- **Cripto em repouso:** banco SQLCipher AES-256, chave derivada da senha (login). Markdown,
-  transcrições e dados ficam **dentro** do banco cifrado; temporários são apagados.
-- **Acesso:** senha forte (Argon2) no MVP; **auto-bloqueio por inatividade**. YubiKey/FIDO2 como
-  2º fator fica para fase posterior.
-- **Trilha de auditoria:** quem aprovou o quê e quando.
+- **Modelo de ameaça (decisão do delegado, 2026-10-23):** a proteção é **física** — o PC fica em
+  sala com câmera e só liga com o login do Windows dele. Assume-se que terceiros não têm acesso
+  físico à máquina. Por isso o app roda **sem senha e sem cifra** (SQLite comum). Princípio de
+  segurança aceito: quem tem acesso físico à máquina já venceu qualquer senha de aplicativo.
+  - **Sem login no app:** abre direto. **Sem "esqueci a senha"** porque não há senha.
+  - **Sem auto-bloqueio.** Fica a cargo do bloqueio de tela do Windows.
+  - **Backup:** arquivo SQLite comum; como não é cifrado, o backup só deve ficar em mídia sob a
+    mesma proteção física (não levar o HD de backup pra fora sem avaliar isso).
+  > Decisão 2026-10-22: roda só no PC do trabalho (drive portátil descartado).
+  > Decisão 2026-10-23: sem senha e sem cifra (antes: SQLCipher + senha Argon2 + auto-bloqueio).
+- **Trilha de auditoria:** quem fez o quê e quando (mantida).
 - **Implantação — instalado no PC da delegacia:** o programa (app + modelos + banco) fica instalado
-  na máquina de trabalho. O banco SQLCipher cifrado protege os dados em repouso (máquina
-  desligada/roubada = arquivo ilegível). **Backup** do banco cifrado (continua cifrado) num HD/PC
-  pessoal do delegado.
-  > Decisão do delegado (2026-10-22): roda só no PC do trabalho. O drive portátil criptografado foi
-  > avaliado e **descartado** do escopo.
+  na máquina de trabalho. **Backup** do arquivo SQLite num HD/PC pessoal do delegado (ver ressalva acima).
 - **Legal:** dado de investigação penal tem regime próprio (fora da LGPD comum, art. 4º III da
-  Lei 13.709), mas valem o devido processo e o segredo de justiça; cripto + acesso + auditoria +
-  minimização atendem as boas práticas esperadas (art. 44).
+  Lei 13.709), mas valem o devido processo e o segredo de justiça; acesso físico controlado +
+  auditoria + minimização atendem as boas práticas esperadas (art. 44).
 
 ## 9. Empacotamento (.exe) e teste no Linux
 
@@ -167,13 +170,15 @@ Nada vindo da IA aparece como fato até ser conferido.
 - [x] 24 testes passando; demos ponta a ponta (`seed_demo.py`, `ingesta_demo.py`).
 - [x] Backend FastAPI (`app/api.py`) + camada de visao (`app/visao.py`): 5 rotas de
       leitura (painel, lista, detalhe, conferencia, busca), só em `127.0.0.1`, senha
-      do banco via env `DELEGACIA_DB_SENHA`. 38 testes passando (14 novos).
+      do banco via env `DELEGACIA_DB_CAMINHO`. 38 testes passando (14 novos).
 - [x] Dashboard (5 telas) em React+Vite (`web/`): Inicio (painel de urgencia),
       Lista, Detalhe, Conferencia (leitura) e Busca. Build servido pelo FastAPI
       (`StaticFiles` em `/`); so leitura por enquanto.
+- [x] Decisao de seguranca (2026-10-23): app sem senha e sem cifra, SQLite comum
+      (protecao fisica da maquina). Removido o SQLCipher. 37 testes passando.
 
 ### A fazer
-- [ ] Login + auto-bloqueio + senha→chave do banco.
+- ~~Login + auto-bloqueio + senha→chave do banco.~~ **Cancelado** (ver seção 8).
 - [ ] Caminho OCR para PDFs escaneados (Docling).
 - [ ] Empacotamento: instalador/`.exe` para o PC da delegacia (build via GitHub Actions).
 - [ ] Coletar com o delegado: tipos reais de documento e campos mais usados.

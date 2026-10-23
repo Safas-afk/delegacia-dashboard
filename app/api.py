@@ -1,11 +1,9 @@
-"""Backend FastAPI do dashboard. So LEITURA nesta etapa: le o banco cifrado e
-serve JSON para o front. Escrita (conferencia, processar documento) e login real
-vem em ciclos proprios.
+"""Backend FastAPI do dashboard. So LEITURA nesta etapa: le o banco e serve JSON
+para o front. Escrita (conferencia, processar documento) vem em ciclo proprio.
 
-Offline real: so escuta em 127.0.0.1. A senha do banco vem de env var
-(DELEGACIA_DB_SENHA) ate o login da Secao 3 substituir isso sem mexer nas rotas.
-Uma conexao por requisicao (app local, 1 usuario): simples e sem problema de
-thread com o SQLCipher.
+Offline real: so escuta em 127.0.0.1. Sem senha e sem login (decisao do delegado
+2026-10-23): o caminho do banco vem de env DELEGACIA_DB_CAMINHO (default demo.db).
+Uma conexao por requisicao (app local, 1 usuario): simples e sem problema de thread.
 """
 import os
 
@@ -19,10 +17,7 @@ DIST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web", "dist")
 
 def abrir_conexao():
     caminho = os.environ.get("DELEGACIA_DB_CAMINHO", "demo.db")
-    senha = os.environ.get("DELEGACIA_DB_SENHA")
-    if not senha:
-        raise RuntimeError("DELEGACIA_DB_SENHA nao definida")
-    return db.conectar(caminho, senha)
+    return db.conectar(caminho)
 
 
 def get_con():

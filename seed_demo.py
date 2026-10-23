@@ -1,4 +1,4 @@
-"""Demonstra a base: cria um banco cifrado, insere o caso do PDF ficticio e
+"""Demonstra a base: cria um banco, insere o caso do PDF ficticio e
 imprime o que o dashboard mostraria (prazo calculado + pendencias automaticas).
 Sem interface - so prova que as regras legais funcionam ponta a ponta.
 """
@@ -6,14 +6,13 @@ import os
 from app import db, prazos, pendencias, catalogo
 
 CAMINHO = "demo.db"
-SENHA = "senha-demo-trocar-depois"
 HOJE = "2026-03-12"   # simula o dia em que o delegado abre o sistema
 
 
 def main():
     if os.path.exists(CAMINHO):
         os.remove(CAMINHO)
-    con = db.conectar(CAMINHO, SENHA)
+    con = db.conectar(CAMINHO)
     db.inicializa(con)
 
     # --- caso ---

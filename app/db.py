@@ -1,25 +1,23 @@
-"""Conexao com o banco SQLCipher (cifrado em repouso) e criacao do esquema.
-A chave vem da senha do delegado; sem ela o arquivo e ilegivel.
+"""Conexao com o banco SQLite (arquivo local) e criacao do esquema.
+
+Decisao do delegado (2026-10-23): sem senha e sem cifra. O PC fica em sala com
+camera e so liga com o login dele; o modelo de ameaca assumido e "sem acesso
+fisico de terceiros". Arquivo SQLite comum.
 """
 import os
-from sqlcipher3 import dbapi2 as sqlcipher
+import sqlite3
 
 SCHEMA = os.path.join(os.path.dirname(__file__), "schema.sql")
 
 
-def conectar(caminho, senha, check_same_thread=True):
-    """Abre (ou cria) o banco cifrado. PRAGMA key tem que vir antes de tudo.
+def conectar(caminho, check_same_thread=True):
+    """Abre (ou cria) o banco.
     check_same_thread=False so nos testes (conexao compartilhada entre threads
     pelo TestClient); em producao e uma conexao por requisicao, na propria thread.
     """
-    con = sqlcipher.connect(caminho, check_same_thread=check_same_thread)
-    con.row_factory = sqlcipher.Row
-    # escapa aspas simples na senha antes de passar pro PRAGMA
-    senha_sql = senha.replace("'", "''")
-    con.execute(f"PRAGMA key = '{senha_sql}'")
+    con = sqlite3.connect(caminho, check_same_thread=check_same_thread)
+    con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys = ON")
-    # valida a senha: se errada, esta leitura falha
-    con.execute("SELECT count(*) FROM sqlite_master")
     return con
 
 

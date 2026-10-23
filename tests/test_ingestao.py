@@ -23,7 +23,7 @@ EXTRACAO = {
 
 @pytest.fixture
 def con(tmp_path):
-    c = db.conectar(str(tmp_path / "t.db"), "chave")
+    c = db.conectar(str(tmp_path / "t.db"))
     db.inicializa(c)
     yield c
     c.close()
