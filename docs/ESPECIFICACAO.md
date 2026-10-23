@@ -165,9 +165,11 @@ Nada vindo da IA aparece como fato até ser conferido.
       proposta não conferida, casando pelo nº do IP; mapeamento determinístico de
       tipificações. Validado com o Qwen real (`ingesta_demo.py`).
 - [x] 24 testes passando; demos ponta a ponta (`seed_demo.py`, `ingesta_demo.py`).
+- [x] Backend FastAPI (`app/api.py`) + camada de visao (`app/visao.py`): 5 rotas de
+      leitura (painel, lista, detalhe, conferencia, busca), só em `127.0.0.1`, senha
+      do banco via env `DELEGACIA_DB_SENHA`. 38 testes passando (14 novos).
 
 ### A fazer
-- [ ] Backend FastAPI + API das telas.
 - [ ] Dashboard (5 telas).
 - [ ] Login + auto-bloqueio + senha→chave do banco.
 - [ ] Caminho OCR para PDFs escaneados (Docling).
@@ -182,6 +184,9 @@ cd ~/projetos/delegacia-dashboard
 prototipo/.venv/bin/python -m pytest -q        # roda os testes (24)
 prototipo/.venv/bin/python seed_demo.py        # demo das regras (sem IA)
 prototipo/.venv/bin/python ingesta_demo.py     # integracao real PDF->Qwen->banco (~2min)
+# backend (le o banco cifrado, serve JSON em 127.0.0.1):
+DELEGACIA_DB_SENHA="senha-demo-trocar-depois" \
+  prototipo/.venv/bin/python -m uvicorn app.api:app --host 127.0.0.1 --port 8000
 # protótipo de IA isolado (precisa do modelo em prototipo/modelos/*.gguf)
 cd prototipo && .venv/bin/python pipeline.py
 ```
