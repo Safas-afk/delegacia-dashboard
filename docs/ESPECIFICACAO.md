@@ -176,6 +176,10 @@ Nada vindo da IA aparece como fato até ser conferido.
       (`StaticFiles` em `/`); so leitura por enquanto.
 - [x] Decisao de seguranca (2026-10-23): app sem senha e sem cifra, SQLite comum
       (protecao fisica da maquina). Removido o SQLCipher. 37 testes passando.
+- [x] Conferencia com ESCRITA (`app/conferencia.py` + tela): o delegado aprova,
+      corrige ou rejeita o que a IA sugeriu (conferido=1 / apaga), com whitelist
+      de colunas e auditoria. Rotas PUT/DELETE `/api/conferencia/{tipo}/{id}` +
+      `GET /api/catalogo`. 50 testes passando.
 
 ### A fazer
 - ~~Login + auto-bloqueio + senha→chave do banco.~~ **Cancelado** (ver seção 8).
