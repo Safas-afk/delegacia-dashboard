@@ -168,9 +168,11 @@ Nada vindo da IA aparece como fato até ser conferido.
 - [x] Backend FastAPI (`app/api.py`) + camada de visao (`app/visao.py`): 5 rotas de
       leitura (painel, lista, detalhe, conferencia, busca), só em `127.0.0.1`, senha
       do banco via env `DELEGACIA_DB_SENHA`. 38 testes passando (14 novos).
+- [x] Dashboard (5 telas) em React+Vite (`web/`): Inicio (painel de urgencia),
+      Lista, Detalhe, Conferencia (leitura) e Busca. Build servido pelo FastAPI
+      (`StaticFiles` em `/`); so leitura por enquanto.
 
 ### A fazer
-- [ ] Dashboard (5 telas).
 - [ ] Login + auto-bloqueio + senha→chave do banco.
 - [ ] Caminho OCR para PDFs escaneados (Docling).
 - [ ] Empacotamento: instalador/`.exe` para o PC da delegacia (build via GitHub Actions).
@@ -181,7 +183,7 @@ Nada vindo da IA aparece como fato até ser conferido.
 ```bash
 cd ~/projetos/delegacia-dashboard
 # ambiente (reusa o venv do prototipo, que ja tem as libs)
-prototipo/.venv/bin/python -m pytest -q        # roda os testes (24)
+prototipo/.venv/bin/python -m pytest -q        # roda os testes (38)
 prototipo/.venv/bin/python seed_demo.py        # demo das regras (sem IA)
 prototipo/.venv/bin/python ingesta_demo.py     # integracao real PDF->Qwen->banco (~2min)
 # backend (le o banco cifrado, serve JSON em 127.0.0.1):
@@ -189,13 +191,17 @@ DELEGACIA_DB_SENHA="senha-demo-trocar-depois" \
   prototipo/.venv/bin/python -m uvicorn app.api:app --host 127.0.0.1 --port 8000
 # protótipo de IA isolado (precisa do modelo em prototipo/modelos/*.gguf)
 cd prototipo && .venv/bin/python pipeline.py
+# front (dashboard React): dev com hot-reload (proxy /api -> :8000) ou build
+cd web && npm run dev            # dev (Vite em :5173)
+cd web && npm run build          # build -> web/dist (servido pelo FastAPI)
 ```
 
 ### Estrutura
 ```
 delegacia-dashboard/
-├─ app/            base: schema.sql, db.py, catalogo.py, prazos.py, pendencias.py
-├─ tests/          testes das regras legais e do banco cifrado
+├─ app/            base + API: schema.sql, db.py, catalogo.py, prazos.py, pendencias.py, visao.py, api.py
+├─ web/            dashboard React+Vite (5 telas); build em web/dist
+├─ tests/          testes das regras legais, do banco cifrado, da visao e da API
 ├─ prototipo/      pipeline de IA validado (PDF→markdown→Qwen)
 ├─ docs/           esta especificação
 └─ seed_demo.py    demonstração ponta a ponta

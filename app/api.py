@@ -10,8 +10,11 @@ thread com o SQLCipher.
 import os
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
 
 from . import db, visao
+
+DIST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web", "dist")
 
 
 def abrir_conexao():
@@ -59,6 +62,12 @@ def conferencia(con=Depends(get_con)):
 @app.get("/api/busca")
 def busca(q: str = Query(""), con=Depends(get_con)):
     return visao.busca(con, q)
+
+
+# Front empacotado: serve o build do Vite em / (depois das rotas /api, que tem
+# prioridade). So monta se o build existir, pra nao quebrar o dev sem `npm run build`.
+if os.path.isdir(DIST):
+    app.mount("/", StaticFiles(directory=DIST, html=True), name="web")
 
 
 if __name__ == "__main__":

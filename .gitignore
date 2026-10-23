@@ -14,3 +14,7 @@ demo.db
 
 # saidas do prototipo
 prototipo/saida/
+
+# front (node)
+web/node_modules/
+web/dist/

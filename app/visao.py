@@ -185,6 +185,7 @@ def busca(con, q):
         "SELECT id, caso_id, numero_oficial, delegado_responsavel FROM inquerito "
         "WHERE numero_oficial LIKE ? ORDER BY id", (termo,))]
     pessoas = [dict(r) for r in con.execute(
-        "SELECT id, inquerito_id, nome, papel FROM pessoa "
-        "WHERE nome LIKE ? ORDER BY id", (termo,))]
+        "SELECT p.id, p.inquerito_id, i.caso_id, p.nome, p.papel FROM pessoa p "
+        "JOIN inquerito i ON i.id = p.inquerito_id "
+        "WHERE p.nome LIKE ? ORDER BY p.id", (termo,))]
     return {"casos": casos, "inqueritos": inqueritos, "pessoas": pessoas}
